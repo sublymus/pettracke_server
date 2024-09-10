@@ -7,7 +7,6 @@ import { limitation } from './Tools/Utils.js';
 // import Scane from '../models/scane.js';
 // import Geo from "geoip-lite";
 import User from '../models/user.js';
-import env from '../../start/env.js';
 export default class CodesController {
     async update_code({ request, auth }: HttpContext) {
         const { code_id, animal_id } = request.body();
