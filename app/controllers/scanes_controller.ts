@@ -71,7 +71,9 @@ export default class ScanesController {
             if (json) {
                 return res;
             } else {
-                return response.redirect().toPath(`${env.get('CALL_BACK_URL')}/#scane_info=${JSON.stringify(res)}`);
+                return response.redirect().toPath(`http://localhost:5173/#scane_info=${JSON.stringify(res)}`);
+
+                // return response.redirect().toPath(`${env.get('CALL_BACK_URL')}/#scane_info=${JSON.stringify(res)}`);
             }
 
             /* 
