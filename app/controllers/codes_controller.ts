@@ -54,13 +54,37 @@ export default class CodesController {
         return User.ParseUser(Animal.ParseAnimal({...user.$attributes,...animal.$attributes,...code.$attributes}))
     }
 
-    async get_codes({ request, auth }: HttpContext) {
+    async get_codes({ request, auth }: HttpContext){
         const { page, limit, order_by,
             user_id,
             code_url,
             code_id,
-            animal_id,
-        } = request.qs()
+            animal_id
+        } = request.qs();
+        return CodesController._get_codes({ page, limit, order_by,
+            user_id,
+            code_url,
+            code_id,
+            animal_id}, auth)
+    }
+    public static async _get_codes({ 
+        page, 
+        limit, 
+        order_by,
+        user_id,
+        code_url,
+        code_id,
+        animal_id,
+    } :{
+        page?:number, 
+        limit?:number, 
+        order_by?:string,
+        user_id?:string,
+        code_url?:string,
+        code_id?:string,
+        animal_id?:string,
+    }, auth:HttpContext['auth']) {
+       
         let query = db.query().from(Code.table)
             .select('*')
             .select('codes.id as id')
@@ -77,8 +101,8 @@ export default class CodesController {
             query = query.where('codes.id', code_id);
         }
         if (user_id) {
-            const user =await auth.authenticate();
-            if (user?.email != 'sublymus@gmail.com') throw new Error("Admin Permission Required");
+            // const user =await auth.authenticate();
+            // if (user?.email != 'sublymus@gmail.com') throw new Error("Admin Permission Required");
             query = query.where('codes.user_id', user_id);
         }else{
             let user = await auth.authenticate();

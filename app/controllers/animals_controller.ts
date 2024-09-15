@@ -20,7 +20,7 @@ export default class AnimalsController {
 
         if (animal.user_id != user.id) throw new Error("Permission Required");
 
-        [   'about',
+        ['about',
             'medication',
             'vaccines',
             'species',
@@ -35,8 +35,8 @@ export default class AnimalsController {
             'veto_address',
             'veto_clinic'
         ].forEach(k => {
-                if (body[k]) (animal as any)[k] = body[k];
-            })
+            if (body[k]) (animal as any)[k] = body[k];
+        })
 
         for (const a of ['images'] as const) {
             if (!body[a]) continue;
@@ -70,7 +70,7 @@ export default class AnimalsController {
         return Animal.ParseAnimal(animal)
     }
     async create_animal({ request, auth }: HttpContext) {
-        const { veto_name,veto_phone,veto_address,veto_clinic,age, about, medication, vaccines, allergies, breed, species, conditions, color, sex, name } = request.body()
+        const { veto_name, veto_phone, veto_address, veto_clinic, age, about, medication, vaccines, allergies, breed, species, conditions, color, sex, name } = request.body()
 
 
 
@@ -133,18 +133,59 @@ export default class AnimalsController {
             user_id,
             all
         } = request.qs()
+        return AnimalsController._get_animals({
+            page, limit, order_by,
+            about,
+            medication,
+            vaccines,
+            type,
+            color,
+            sex,
+            name,
+            animal_id,
+            user_id,
+            all
+        }, auth)
+    }
+    public static async _get_animals({ page, limit, order_by,
+        about,
+        medication,
+        vaccines,
+        type,
+        color,
+        sex,
+        name,
+        animal_id,
+        user_id,
+        all
+    }: {
+        page?: number,
+        limit?: number,
+        order_by?: string,
+        about?: string,
+        medication?: string,
+        vaccines?: string,
+        type?: string,
+        color?: string,
+        sex?: string,
+        name?: string,
+        animal_id?: string,
+        user_id?: string,
+        all?: string,
+    }, auth: HttpContext['auth']) {
+
         let query = db.query().from(Animal.table)
             .select('*')
         if (animal_id) {
             query = query.where('id', animal_id);
         }
         if (user_id) {
-            const user = await auth.authenticate();
-            if (user?.email != 'sublymus@gmail.com') throw new Error("Admin Permission Required");
+            // const user = await auth.authenticate();
+            // if (user?.email != 'sublymus@gmail.com') throw new Error("Admin Permission Required");
             query = query.where('user_id', user_id);
         } else if (all) {
-            const user = await auth.authenticate();
-            if (user?.email != 'sublymus@gmail.com') throw new Error("Admin Permission Required");
+            // const user = await auth.authenticate();
+            // if (user?.email != 'sublymus@gmail.com') throw new Error("Admin Permission Required");
         } else if (!animal_id) {
             let user = await auth.authenticate();
             query = query.where('user_id', user.id);

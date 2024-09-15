@@ -13,6 +13,7 @@ import RatingsController from '../app/controllers/ratings_controller.js';
 router.get('/google_connexion', [AuthController, 'google_connexion']);
 router.get('/gl_push_info', [AuthController, 'google_push_info']);
 router.get('me', [AuthController, 'me']);
+router.get('/get_users',[AuthController,'get_users'])
 router.post('/create_user', [AuthController,'create_user']);
 router.put('/edit_me', [AuthController, 'edit_me']);
 router.get('/delete_user_account',[AuthController,'delete_user_account'])

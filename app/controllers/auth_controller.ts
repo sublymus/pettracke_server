@@ -8,6 +8,9 @@ import Phone from '../models/phone.js';
 import Address from '../models/address.js';
 import { setBrowser } from './user_browsers_controller.js';
 import hash from '@adonisjs/core/services/hash'
+import Rating from '../models/rating.js';
+import CodesController from './codes_controller.js';
+import AnimalsController from './animals_controller.js';
 
 export default class AuthController {
 
@@ -328,8 +331,8 @@ export default class AuthController {
             ...urls
         }
     }
-    async get_users({ request }: HttpContext) {
-        const { page, limit, full_name, email, phone, user_id, order_by, text } = paginate(request.qs() as { page: number | undefined, limit: number | undefined } & { [k: string]: any });
+    async get_users({ request ,auth }: HttpContext) {
+        const { page, limit, full_name, email, phone, user_id, order_by, text, count_pet, count_code,add_pet, add_code, add_rating } = paginate(request.qs() as { page: number | undefined, limit: number | undefined } & { [k: string]: any });
 
         let query = db.query().from(User.table)
             .select('*')
@@ -365,7 +368,19 @@ export default class AuthController {
             const phone = await Phone.findBy('context', u.id);
             u.phone = phone?.$attributes
             let address = await Address.findBy('context', u.id);
-            u.address = address?.$attributes
+            u.address = address?.$attributes;
+            if(add_rating){
+                const rating = await Rating.findBy('user_id',u.id);
+                u.rating = rating;
+            }
+            if(count_code||add_code){
+                const codes = await CodesController._get_codes({user_id:u.id}, auth);
+                u.codes = count_code? codes.total : codes;
+            }
+            if(count_pet||add_pet){
+                const animals = await AnimalsController._get_animals({user_id:u.id}, auth);
+                u.animals = count_pet? animals.total : animals;
+            }
             rev(null);
         }))
         await Promise.allSettled(promises);
