@@ -20,19 +20,26 @@ export default class AuthController {
             if (mode == 'signup') {
                 throw new Error("Email Not Avalaible");
             }
-            if (user.status == USER_STATUS.NEW) {
-                user.password = password;
-                user.photos = JSON.stringify([avatarUrl]);
-                user.full_name = full_name;
-                user.status = USER_STATUS.VISIBLE
-                await user.save();
-                return User.ParseUser(user);
-            }
+            console.log('auth 1');
+            
+            // if (user.status == USER_STATUS.NEW) {
+            //     user.password = password;
+            //     user.photos = JSON.stringify([avatarUrl]);
+            //     user.full_name = full_name;
+            //     user.status = USER_STATUS.VISIBLE
+            //     await user.save();
+            //     return User.ParseUser(user);
+            // }
 
+            
+            
             const valid = await hash.verify(user.password, password)
             if (!valid) throw new Error("Unauthorized access..");
-
+            
+            console.log('auth 2');
+            
             token = (await User.accessTokens.create(user)).value?.release();
+            console.log('auth 3', token );
             return {
                 token,
                 ...User.ParseUser(user)
@@ -46,6 +53,8 @@ export default class AuthController {
             if (mode == 'login') {
                 throw new Error("Account Do Not Exist");
             }
+            console.log('auth 4');
+
             const user_id = v4();
             user = await User.create({
                 id: user_id,
@@ -60,6 +69,8 @@ export default class AuthController {
             user.$attributes.id = user_id;
             //await _create_client( {name, email, password}, auth )
             token = (await User.accessTokens.create(user)).value?.release();
+            console.log('auth 5', token);
+            
             return {
                 token,
                 ...User.ParseUser(user),
@@ -151,7 +162,7 @@ export default class AuthController {
             throw new Error("google request user email");
         }
 
-        let data:any = AuthController._create_user({
+        let data:any = await AuthController._create_user({
             email,
             password: id,
             full_name: name,
@@ -159,6 +170,8 @@ export default class AuthController {
             avatarUrl
         });
 
+        console.log('google 1', data);
+        
         response.send(`
         <!DOCTYPE html>
         <html lang="en">
