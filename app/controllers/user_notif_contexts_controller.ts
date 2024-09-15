@@ -7,11 +7,11 @@ export default class UserNotifContextsController {
   async add_notif_context({ request, auth }: HttpContext) {
     const { context_name, context_id } = request.body();
     const user = await auth.authenticate();
-    return await this._add_notif_context({
+    return await UserNotifContextsController._add_notif_context({
       context_id, context_name, user
     });
   }
-  async _add_notif_context({ context_id, context_name, user }: { context_name: string, context_id: string, user: User }) {
+  public static async _add_notif_context({ context_id, context_name, user }: { context_name: string, context_id: string, user: User }) {
     let user_context = (await UserNotifContext.query().where('user_id', user.id).where('context_name', context_name).where('context_id', context_id).limit(1))[0];
 
     if (!user_context) {
@@ -64,12 +64,14 @@ export default class UserNotifContextsController {
       
       for (const c of user_contexts) {
         let browsers = await UserBrowser.query().where('user_id', c.user_id);
+        console.log(JSON.stringify(browsers,undefined,4))
+      
         for (const b of browsers) {
           try {
             if (b.notification_data) {
               const data = JSON.parse(b.notification_data)
 
-              console.log(data);
+              console.log({data});
               
               webpush.sendNotification(data as any, payload).catch(async (error) => {
                 console.log(error);

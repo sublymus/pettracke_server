@@ -12,7 +12,7 @@ export async function setBrowser(user: User & {
   const token = request.headers().authorization?.split(' ')[1] || '';
   if (user_browser) {
     user_browser.token = token;
-    await user_browser.save()
+    await user_browser.save();
   } else {
     await UserBrowser.create({
       enable: true,
@@ -68,12 +68,14 @@ export default class UserBrowsersController {
   }
   async set_notification_data({ request, auth }: HttpContext) {
     const { notification_data } = request.body();
+    console.log({notification_data});
     const user = await auth.authenticate();
-    
     const user_browser = await setBrowser(user, request);
     if(!user_browser) return;
     user_browser.token = request.headers().authorization?.split(' ')[1] || '';
     user_browser.notification_data = notification_data
+    console.log({notification_data});
+    
     await user_browser.save();
   }
   async get_user_browsers({ request, auth }: HttpContext) {

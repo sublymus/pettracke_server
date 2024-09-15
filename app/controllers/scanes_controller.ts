@@ -10,8 +10,8 @@ import Address from '../models/address.js';
 import db from '@adonisjs/lucid/services/db';
 import { limitation } from './Tools/Utils.js';
 import UserNotifContextsController from './user_notif_contexts_controller.js';
-import env from '../../start/env.js';
 import transmit from '@adonisjs/transmit/services/main';
+import env from '../../start/env.js';
 
 export default class ScanesController {
     async scane_code({ request, response }: HttpContext) {
@@ -52,13 +52,20 @@ export default class ScanesController {
             const phone = await Phone.findBy('context', owner.id);
             const address = await Address.findBy('context', owner.id);
 
-            UserNotifContextsController._push_notification({
+            await UserNotifContextsController._add_notif_context({
+                context_id:code.id,
+                context_name:'scanes',
+                user:owner
+            })
+           await  UserNotifContextsController._push_notification({
                 context_id: code.id,
                 user_id: code.user_id,
                 title: animal.name.toUpperCase() + ' was found, See more..',
-                content: `${animal.name}'s QR code has just been scanned.`,
+                content: `${animal.name}'s QR code has just been scanned. CodeQr:${code.code_url}`,
             })
+
             transmit.broadcast(owner.id, { event: 'scane' })
+            
             const res = {
                 animal: Animal.ParseAnimal(animal),
                 owner: { ...User.ParseUser(owner), address: address?.$attributes, phone: phone?.$attributes },
@@ -71,78 +78,12 @@ export default class ScanesController {
             if (json) {
                 return res;
             } else {
-                return response.redirect().toPath(`http://localhost:5173/#scane_info=${JSON.stringify(res)}`);
-
-                // return response.redirect().toPath(`${env.get('CALL_BACK_URL')}/#scane_info=${JSON.stringify(res)}`);
+                return response.redirect().toPath(`${env.get('FRONT_ORIGINE')}/#scane_info=${JSON.stringify(res)}`);
             }
-
-            /* 
-            
-            {
-                animal: Animal.ParseAnimal(animal),
-                owner: User.ParseUser(owner),
-                scane: {
-                    ...scane.$attributes,
-                    id: scane_id
-                }
-            }
-            
-            */
-            // le code existe
-
-            // on te montre les information sur le chien et le proprio..
-            /* 
-            on te demande:
-
-            const x = document.getElementById("demo");
-
-            function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition);
-            } else { 
-                x.innerHTML = "Geolocation is not supported by this browser.";
-            }
-            }
-
-            function showPosition(position) {
-            x.innerHTML = "Latitude: " + position.coords.latitude + 
-            "<br>Longitude: " + position.coords.longitude;
-            }
-
-            https://maps.google.com/?q=<lat>,<lng>
-
-
-                - ( localisation ? user location :'') + ip location
-                - d'aider a retrouver le chien
-                - laisser un message
-
-                on enregistre dans ton localstorage un json
-                    {
-                        code:'rtyu',
-                        chien info + owner info
-                        location + date
-                    }
-            */
         } else {
-            // le code n'existe pas
-
             return {
                 creatable: code_url,
             }
-            /* 
-                - on te dirige ver la page d'ajout de code
-                    localhost => creatable code 
-                - si tu n'est pas auth
-                    on te demand de te connexter ou t'inscrire
-                - si tu es authentifie et creatable code
-                on te demand les de choisir un animal 
-                ou d'en cree; localhost => newAnimalFor creatable
-
-                - si newAnimalFor creatable
-                    retour su choir un animal :  newAnimalFor creatable  [x]
-                - si code cree  creatable code [x]
-            */
-
         }
     }
 
@@ -165,36 +106,6 @@ export default class ScanesController {
         if (is_real_address) {
             scane.is_real_address = is_real_address == true || 'true' ? true : false;
         }
-
-
-        // let scanePhone = await Phone.findBy('context', scane_id);
-        // if (phone) {
-        //     try {
-        //         const data = JSON.parse(phone);
-
-        //         if (scanePhone) {
-        //             phone.country = data.name;
-        //             phone.format = data.format;
-        //             phone.dial_code = data.dialCode;
-        //             phone.phone = data.phone;
-        //             phone.country_code = data.countryCode
-        //             phone.save();
-        //         } else {
-        //             const phone_id = v4()
-        //             scanePhone = await Phone.create({
-        //                 context: scane_id,
-        //                 id: phone_id,
-        //                 country: name,
-        //                 format: data.format,
-        //                 dial_code: data.dialCode,
-        //                 phone: phone,
-        //                 country_code: data.countryCode
-        //             });
-        //             scanePhone.id = phone_id
-        //             scanePhone.$attributes.id = phone_id
-        //         }
-        //     } catch (error) { }
-        // }
 
         let scaneAddress = await Address.findBy('context', scane.id);
 
