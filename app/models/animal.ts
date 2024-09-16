@@ -36,9 +36,6 @@ export default class Animal extends BaseModel {
   declare allergies : string
 
   @column()
-  declare conditions : string
-
-  @column()
   declare medication : string
 
   @column()
@@ -49,9 +46,6 @@ export default class Animal extends BaseModel {
 
   @column()
   declare veto_phone : string
-
-  @column()
-  declare veto_address : string
 
   @column()
   declare veto_clinic : string

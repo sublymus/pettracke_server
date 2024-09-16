@@ -16,14 +16,13 @@ export default class extends BaseSchema {
       table.string('breed')
       table.string('images')
       table.string('about')
+      
       table.string('allergies')
-      table.string('conditions')
       table.string('medication')
       table.string('vaccines')
 
       table.string('veto_name')
       table.string('veto_phone')
-      table.string('veto_address')
       table.string('veto_clinic')
 
       table.timestamp('created_at')

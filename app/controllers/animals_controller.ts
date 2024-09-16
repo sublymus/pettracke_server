@@ -6,6 +6,8 @@ import { createFiles } from './Tools/FileManager/CreateFiles.js';
 import { deleteFiles } from './Tools/FileManager/DeleteFiles.js';
 import db from '@adonisjs/lucid/services/db';
 import { limitation } from './Tools/Utils.js';
+import Code from '../models/code.js';
+import Scane from '../models/scane.js';
 
 export default class AnimalsController {
     async update_animal({ request, auth }: HttpContext) {
@@ -26,13 +28,11 @@ export default class AnimalsController {
             'species',
             'breed',
             'allergies',
-            'conditions',
             'color',
             'sex',
             'name',
             'veto_name',
             'veto_phone',
-            'veto_address',
             'veto_clinic'
         ].forEach(k => {
             if (body[k]) (animal as any)[k] = body[k];
@@ -70,7 +70,7 @@ export default class AnimalsController {
         return Animal.ParseAnimal(animal)
     }
     async create_animal({ request, auth }: HttpContext) {
-        const { veto_name, veto_phone, veto_address, veto_clinic, age, about, medication, vaccines, allergies, breed, species, conditions, color, sex, name } = request.body()
+        const { veto_name, veto_phone, veto_clinic, age, about, medication, vaccines, allergies, breed, species, conditions, color, sex, name } = request.body()
 
 
 
@@ -103,7 +103,6 @@ export default class AnimalsController {
             allergies,
             breed,
             species,
-            conditions,
             color,
             sex,
             name,
@@ -111,7 +110,6 @@ export default class AnimalsController {
             age,
             veto_name,
             veto_phone,
-            veto_address,
             veto_clinic
         })
         animal.id = animal_id
@@ -229,6 +227,18 @@ export default class AnimalsController {
         if (!animal) throw new Error("Animal not found");
         if (animal.user_id != user.id) throw new Error("PREMISSION REQUIRED");
 
+        const codes = await Code.findManyBy('animal_id', animal_id);
+        await Promise.allSettled(codes.map(c=>new Promise(async(rev)=>{
+            const scanes = await Scane.findManyBy('code_url', c.code_url);
+            await Promise.allSettled(scanes.map(s=>new Promise(async(rev)=>{
+                await s.delete();
+                rev(null);
+            })))    
+            await c.delete();
+            rev(null);
+        })))
+
+       
         await deleteFiles(animal_id);
         await animal.delete()
         // await db.rawQuery('delete from `features` where `id` = :id;', { id: feature_id });
