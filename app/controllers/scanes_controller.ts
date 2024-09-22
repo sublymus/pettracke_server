@@ -160,6 +160,7 @@ export default class ScanesController {
         let query = db.query()
             .from(Scane.table)
             .select('*')
+            .select('scanes.created_at as created_at')
             .select('scanes.id as id')
             .leftJoin('codes', 'codes.code_url', 'scanes.code_url');
         if (!scane_id && !user_id) {
