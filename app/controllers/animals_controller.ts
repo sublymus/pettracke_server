@@ -31,7 +31,7 @@ export default class AnimalsController {
             'color',
             'sex',
             'age',
-            
+
             'name',
             'veto_name',
             'veto_phone',
@@ -72,7 +72,7 @@ export default class AnimalsController {
         return Animal.ParseAnimal(animal)
     }
     async create_animal({ request, auth }: HttpContext) {
-        const { veto_name, veto_phone, veto_clinic, age, about, medication, vaccines, allergies, breed, species, conditions, color, sex, name } = request.body()
+        const { veto_name, veto_phone, veto_clinic, age, about, medication, vaccines, allergies, breed, species, color, sex, name } = request.body()
 
 
 
