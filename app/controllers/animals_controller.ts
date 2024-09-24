@@ -31,6 +31,7 @@ export default class AnimalsController {
             'color',
             'sex',
             'age',
+            
             'name',
             'veto_name',
             'veto_phone',
