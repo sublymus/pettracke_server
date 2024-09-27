@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pwa-cache-v1';
+const CACHE_NAME = 'pwa-cache-v2';
 const OFFLINE_URL = 'offline.html';
 
 // Liste des fichiers à mettre en cache, y compris le fichier offline.html
@@ -43,7 +43,7 @@ self.addEventListener('fetch', (event) => {
 // Mise à jour du cache et suppression des anciennes versions
 self.addEventListener('activate', (event) => {
     const cacheWhitelist = [CACHE_NAME];
-
+    
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
