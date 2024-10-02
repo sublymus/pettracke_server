@@ -17,8 +17,7 @@ export default class AuthController {
     public static async _create_user({ email, avatarUrl = '/src/res/user-fill.png', password, full_name, mode }: { full_name: string, password: string, avatarUrl?: string, email: string, mode: 'login' | 'signup' | 'dual' }) {
         let user = await User.findBy("email", email);
         let token: string | undefined;
-        console.log(email, password, mode);
-
+        
         if (user) {
             if (mode == 'signup') {
                 throw new Error("Email Not Avalaible");

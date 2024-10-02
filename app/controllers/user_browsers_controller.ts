@@ -1,11 +1,8 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from "#models/user";
 import UserBrowser from "#models/user_browser";
-import { AccessToken } from "@adonisjs/auth/access_tokens";
 
-export async function setBrowser(user: User & {
-  currentAccessToken: AccessToken;
-}, request: HttpContext['request']) {
+export async function setBrowser(user: User , request: HttpContext['request']) {
 
 
   const user_browser = (await UserBrowser.query().where('user_id', user.id).where('user_agent', request.headers()['user-agent'] || '').limit(1))[0];
@@ -112,8 +109,8 @@ export default class UserBrowsersController {
 
   }
 }
-/* 
 
+/* 
 {
   endpoint: 'https://fcm.googleapis.com/fcm/send/eaQn-y4vk08:APA91bEF1XkQ2B2LqrW-CJp3alSuuIvrXSmfKHkatwlbSmehTA7l03ZZ3zLO99kUsCj2RcLEEe1oAN1jfhKx3FB8ZhO8ibaH2bBCTCEqr6IgbBmKS83Oq5Gr7gcyYeh1iVBh2_3hHEUU',
   expirationTime: null,
@@ -127,5 +124,4 @@ export default class UserBrowsersController {
     context_id: 'cde8bd12-d0b0-489f-ad94-fa65cdd55283'
   }
 }
-
 */
