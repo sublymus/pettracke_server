@@ -1,8 +1,7 @@
 /*
-|--------------------------------------------------------------------------
-| Ace entry point
-|--------------------------------------------------------------------------
-|
+|--------------------------------------------------------------------------|
+|                           Ace entry point                                |
+|--------------------------------------------------------------------------|
 | The "console.ts" file is the entrypoint for booting the AdonisJS
 | command-line framework and executing commands.
 |
@@ -24,6 +23,7 @@ const APP_ROOT = new URL('../', import.meta.url)
  * The importer is used to import files in context of the
  * application.
  */
+
 const IMPORTER = (filePath: string) => {
   if (filePath.startsWith('./') || filePath.startsWith('../')) {
     return import(new URL(filePath, APP_ROOT).href)

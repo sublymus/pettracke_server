@@ -9,7 +9,8 @@ export default class extends BaseSchema {
       table.string('full_name').nullable()
       table.string('email', 254).notNullable().unique()
       table.string('password').notNullable()
-      
+      table.string('google_id')
+      table.boolean('is_pass_ok')
       table.string('photos')
       table.string('status')
       table.string('address')

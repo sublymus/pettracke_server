@@ -31,7 +31,7 @@ router.get('/get_codes', [CodesController, 'get_codes']);
 router.delete('/delete_code/:id', [CodesController, 'delete_code']);
 //Scane
 router.get('/get_scanes',[ScanesController,'get_scanes'])
-router.get('/s_c/:id', [ScanesController, 'scane_code']);
+router.get('/s/:id', [ScanesController, 'scane_code']);
 router.put('/update_scane', [ScanesController, 'update_scane']);
 // User Browsers
 router.get('/get_user_browsers', [UserBrowsersController, 'get_user_browsers'])

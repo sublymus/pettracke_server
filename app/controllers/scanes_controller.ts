@@ -52,20 +52,6 @@ export default class ScanesController {
             const phone = await Phone.findBy('context', owner.id);
             const address = await Address.findBy('context', owner.id);
 
-            await UserNotifContextsController._add_notif_context({
-                context_id:code.id,
-                context_name:'scanes',
-                user:owner
-            })
-           await  UserNotifContextsController._push_notification({
-                context_id: code.id,
-                user_id: code.user_id,
-                title: animal.name.toUpperCase() + ' was found, See more..',
-                content: `${animal.name}'s QR code has just been scanned. CodeQr:${code.code_url}`,
-            })
-
-            transmit.broadcast(owner.id, { event: 'scane' })
-            
             const res = {
                 animal: Animal.ParseAnimal(animal),
                 owner: { ...User.ParseUser(owner), address: address?.$attributes, phone: phone?.$attributes },
@@ -80,10 +66,9 @@ export default class ScanesController {
             } else {
                 return response.redirect().toPath(`${env.get('FRONT_ORIGINE')}/#scane_info=${JSON.stringify(res)}`);
             }
+            
         } else {
-            return {
-                creatable: code_url,
-            }
+            return response.redirect().toPath(`${env.get('FRONT_ORIGINE')}/#list={"create_code":${JSON.stringify(code_url)}}`);
         }
     }
 
@@ -137,12 +122,27 @@ export default class ScanesController {
                 } catch (error) { }
             }
         }
-
+        
         await scane.save()
         const code = await Code.findBy('code_url', scane.code_url);
         if (code) {
+            const user = await User.find(code.user_id);
+            const animal = await Animal.find(code.animal_id)
             console.log('update_scane');
+            user && await UserNotifContextsController._add_notif_context({
+                context_id:code.id,
+                context_name:'scanes',
+                user:user
+            })
+            animal && await  UserNotifContextsController._push_notification({
+                context_id: code.id,
+                user_id: code.user_id,
+                title: animal.name.toUpperCase() + ' was found, See more..',
+                content: `${animal.name}'s QR code has just been scanned. CodeQr:${code.code_url}`,
+            })
 
+            // transmit.broadcast(owner.id, { event: 'scane' })
+            
             transmit.broadcast(code.user_id, { event: 'update_scane' })
         }
         console.log({ s: scane.$attributes });

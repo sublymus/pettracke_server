@@ -48,6 +48,12 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ serializeAs: null })
   declare password: string
 
+  @column()
+  declare is_pass_ok: boolean
+
+  @column()
+  declare google_id: string
+
   @column.dateTime({ autoCreate: true })
   declare created_at: DateTime
 
@@ -58,18 +64,19 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
 
   @beforeSave()
-  public static async setUUID (user: User) {
-   if(!user.id)user.id = v4()
+  public static async setUUID(user: User) {
+    if (!user.id) user.id = v4()
   }
 
   public static ParseUser(user: User['$attributes']) {
     let photos = [];
     try {
       photos = JSON.parse(user.photos || '[]')
-    } catch (error) { console.error(error);
-     }
+    } catch (error) {
+      console.error(error);
+    }
     return {
-      ...(user.$attributes||user),
+      ...(user.$attributes || user),
       photos,
       password: undefined,
     } as any as User['$attributes']

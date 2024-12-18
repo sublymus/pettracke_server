@@ -14,13 +14,35 @@ import AnimalsController from './animals_controller.js';
 
 export default class AuthController {
 
-    public static async _create_user({ email, avatarUrl = '/src/res/user-fill.png', password, full_name, mode }: { full_name: string, password: string, avatarUrl?: string, email: string, mode: 'login' | 'signup' | 'dual' }) {
+    public static async _create_user({ email, avatarUrl = '/src/res/user-fill.png', password,google_id, full_name, mode }: {google_id?:string, full_name: string, password?: string, avatarUrl?: string, email: string, mode: 'login' | 'signup' | 'dual' }) {
         let user = await User.findBy("email", email);
         let token: string | undefined;
         
         if (user) {
             if (mode == 'signup') {
+                if(password && !user.is_pass_ok){
+                    user.password = password;
+                    user.is_pass_ok = true;
+                    await user.save();
+                    token = (await User.accessTokens.create(user)).value?.release();
+                    console.log('auth 3', token );
+                    return {
+                        token,
+                        ...User.ParseUser(user)
+                    }
+                }
                 throw new Error("Email Not Avalaible");
+            }else if(mode == 'dual'){
+                if(google_id && !user.google_id ){
+                    user.google_id = google_id;
+                    await user.save();
+                    token = (await User.accessTokens.create(user)).value?.release();
+                    console.log('auth 3', token );
+                    return {
+                        token,
+                        ...User.ParseUser(user)
+                    }
+                }
             }
             console.log('auth 1');
             
@@ -33,11 +55,16 @@ export default class AuthController {
             //     return User.ParseUser(user);
             // }
 
-            
-            
-            const valid = await hash.verify(user.password, password)
-            if (!valid) throw new Error("Unauthorized access..");
-            
+            if(google_id){
+                if(user.google_id !== google_id){
+                    throw new Error("Unauthorized access.. google_id not avalaible");
+                }
+            }else if(password){
+                const valid = await hash.verify(user.password, password)
+                if (!valid) throw new Error("Unauthorized access.. password not avalaible");
+            }else{
+                throw new Error("Unauthorized access.. googole_id or password required");
+            }
             console.log('auth 2');
             
             token = (await User.accessTokens.create(user)).value?.release();
@@ -55,17 +82,21 @@ export default class AuthController {
             if (mode == 'login') {
                 throw new Error("Account Do Not Exist");
             }
+
             console.log('auth 4');
 
             const user_id = v4();
+
             user = await User.create({
                 id: user_id,
                 email,
                 full_name: full_name,
-                password: password,
+                password: password||Date.now().toString()+Math.random().toExponential().toString(),
+                google_id: google_id,
+                is_pass_ok:!!password,
                 status: USER_STATUS.VISIBLE,
                 photos: JSON.stringify([avatarUrl]),
-            })
+            });
 
             user.id = user_id;
             user.$attributes.id = user_id;
@@ -166,7 +197,7 @@ export default class AuthController {
 
         let data:any = await AuthController._create_user({
             email,
-            password: id,
+            google_id: id,
             full_name: name,
             mode: 'dual',
             avatarUrl
@@ -209,8 +240,8 @@ export default class AuthController {
 
         return AuthController._create_user({
             email,
-            full_name: email.substring(0, email.indexOf('@')),
             password,
+            full_name: email.substring(0, email.indexOf('@')),
             mode
         })
     }
@@ -239,6 +270,19 @@ export default class AuthController {
         (['full_name'] as const).forEach((attribute) => {
             if (body[attribute]) user[attribute] = body[attribute];
         });
+        
+        if(body.password){
+            if(!user.is_pass_ok ){
+                user.password = body.password;
+                user.is_pass_ok = true;
+            }else if (body.last_password){
+                const valid = await hash.verify(user.password, body.password);
+                if(valid){
+                    user.password = body.password;
+                    user.is_pass_ok = true;
+                }
+            }
+        }
 
         let phone = await Phone.findBy('context', user.id);
 
