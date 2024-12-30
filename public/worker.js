@@ -4,7 +4,7 @@ self.addEventListener('push', e => {
     console.log("Push Received...");
     self.registration.showNotification(data.title, {
         body: data.content,
-        sound: 'http://localhost:3333/src/res/level-up-191997.mp3',
+        sound: 'http://perttrack.ru/src/res/level-up-191997.mp3',
         icon: '/src/res/dog-area.png',
         actions: [
             {
