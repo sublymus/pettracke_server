@@ -48,20 +48,25 @@ router.post('/add_rating', [RatingsController, 'add_rating'])
 router.get('/get_ratings', [RatingsController, 'get_ratings'])
 
 router.get(`${env.get("FILE_STORAGE_URL")}/*`, ({ params, response }) => {
-  const fileName = `/${(params['*'] as string[]).join('/')}` 
+  const fileName = `/${(params['*'] as string[]).join('/')}`
+  console.log("__FS__",fileName); 
   response.download(`${env.get("FILE_STORAGE_PATH")}${fileName}`);
 });
 router.get('/public/*', ({ params, response }) => {
+  console.log("__PUBLIC__"); 
   const fileName = `/${(params['*'] as string[]).join('/')}`
   response.download(`${env.get("PUBLIC_PATH")}${fileName}`);
 });
 
 router.get('/', ({ response }) => {
+  console.log("__HOME__"); 
   response.download(`${env.get("PUBLIC_PATH")}/index.html`); 
 })
 
 router.get('/*', ({ params, response }) => {
+  
   const fileName = `/${(params['*'] as string[]).join('/')}`
+  console.log("__RES__",fileName);
   if (
       params['*'][0] == 'assets' ||
       params['*'][0] == 'src' || 
