@@ -32,9 +32,9 @@ export default class ScanesController {
                 owner = await User.find(code.user_id);
             } catch (error) { }
 
-            if (!animal || !owner) return {
-                animal: animal && Animal.ParseAnimal(animal),
-                owner: owner && User.ParseUser(owner),
+            if (!animal || !owner)  {
+                await code.delete();
+                return response.redirect().toPath(`${env.get('FRONT_ORIGINE')}/#list={"create_code":${JSON.stringify(code_url)}}`);
             }
 
             const ip = request.ip()

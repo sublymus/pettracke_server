@@ -40,6 +40,15 @@ export default class CodesController {
         if (!animal) throw new Error("Animal Not Found");
         if (animal.user_id != user.id) throw new Error("Permission Required");
 
+        const oldCode = await Code.findBy('code_url', code_url);
+        if(oldCode){
+            const oldCodeUser = await User.find(oldCode.user_id);
+            if (oldCodeUser) {
+                throw new Error("Code is already used");
+            }else{
+                await oldCode.delete();
+            }
+        }
         const code_id = v4();
 
         const code = await Code.create({

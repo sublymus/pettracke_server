@@ -11,6 +11,8 @@ import hash from '@adonisjs/core/services/hash'
 import Rating from '../models/rating.js';
 import CodesController from './codes_controller.js';
 import AnimalsController from './animals_controller.js';
+import Code from '#models/code';
+import Animal from '#models/animal';
 
 export default class AuthController {
 
@@ -126,15 +128,38 @@ export default class AuthController {
         const user = await auth.authenticate();
         AuthController._golbal_disconnection(user, user_id)
 
+        const deleteAll = async ()=>{
+            try {
+                
+            const codes = await Code.findManyBy('user_id',user_id||user.id);
+
+            console.log({codes});
+            for (const code of codes) {
+                await code.delete();
+            }
+            } catch (error) {}
+            try {
+                
+                const animals = await Animal.findManyBy('user_id',user_id);
+    
+                console.log({animals});
+                for (const animal of animals) {
+                    await animal.delete();
+                }
+                } catch (error) {}
+                
+        }
         if (user_id /*&& admin / moderator*/) {
             const tagetUser = await User.find(user_id);
             if (!tagetUser) return 'user not found';
             await tagetUser.delete();
+            await deleteAll()
             return {
                 isDeleted: tagetUser.$isDeleted
             }
         } else {
             await user.delete();
+            await deleteAll()
             return {
                 isDeleted: user.$isDeleted
             }
