@@ -12,7 +12,8 @@ import Scane from '../models/scane.js';
 export default class AnimalsController {
     async update_animal({ request, auth }: HttpContext) {
 
-        const body = request.body();
+        const body = request
+        .body();
 
         const user = await auth.authenticate();
 
